@@ -109,6 +109,7 @@ const MySubscriptionsPage = createLazyRouteComponent(() => import('@/pages/dashb
 const NotificationsPage = createLazyRouteComponent(() => import('@/pages/notifications'), 'NotificationsPage')
 const TokensPage = createLazyRouteComponent(() => import('@/pages/dashboard/tokens'), 'TokensPage')
 const CliAuthPage = createLazyRouteComponent(() => import('@/pages/cli-auth'), 'CliAuthPage')
+const DeviceAuthPage = createLazyRouteComponent(() => import('@/pages/device'), 'DeviceAuthPage')
 const SecuritySettingsPage = createLazyRouteComponent(
   () => import('@/pages/settings/security'),
   'SecuritySettingsPage',
@@ -365,6 +366,16 @@ const dashboardTokensRoute = createRoute({
   component: TokensPage,
 })
 
+const deviceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'device',
+  beforeLoad: requireAuth,
+  validateSearch: (search: Record<string, unknown>): { code?: string } => ({
+    code: typeof search.code === 'string' && search.code ? search.code : undefined,
+  }),
+  component: DeviceAuthPage,
+})
+
 const cliAuthRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'cli/auth',
@@ -459,6 +470,7 @@ const routeTree = rootRoute.addChildren([
   dashboardSubscriptionsRoute,
   dashboardNotificationsRoute,
   dashboardTokensRoute,
+  deviceRoute,
   cliAuthRoute,
   settingsSecurityRoute,
   settingsProfileRoute,

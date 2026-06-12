@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+  <defs>
+    <linearGradient id="az-a" x1="5.586" y1="14.498" x2="15.76" y2="-.089" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1988d9"/>
+      <stop offset=".9" stop-color="#54aef0"/>
+    </linearGradient>
+    <linearGradient id="az-b" x1="9.826" y1="11.585" x2="7.346" y2="16.862" gradientUnits="userSpaceOnUse">
+      <stop offset=".1" stop-color="#54aef0"/>
+      <stop offset="1" stop-color="#1884d3"/>
+    </linearGradient>
+  </defs>
+  <path d="M1.014 14.778L7.857 1.003h3.575l-3.96 7.924 4.788 4.27-1.44.638-3.35-2.985-.845 1.69z" fill="url(#az-a)"/>
+  <path d="M1.014 14.778l9.21-1.581 2.89 2.8H1.014z" fill="#1a86d9"/>
+  <path d="M10.224 13.197l2.89 2.8 3.872-1.219-6.762-1.581z" fill="url(#az-b)"/>
+</svg>

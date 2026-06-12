@@ -8,6 +8,7 @@ import { getHeadlineVersion } from '@/shared/lib/skill-lifecycle'
 import { TokenList } from '@/features/token/token-list'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { APP_SHELL_PAGE_CLASS_NAME } from '@/app/page-shell-style'
+import { UserAvatar } from '@/shared/components/user-avatar'
 import { limitPreviewItems } from './dashboard-preview'
 
 const DASHBOARD_PREVIEW_LIMIT = 5
@@ -42,13 +43,11 @@ export function DashboardPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-5">
-            {user?.avatarUrl && (
-              <img
-                src={user.avatarUrl}
-                alt={user.displayName}
-                className="h-20 w-20 rounded-2xl border-2 border-border/60 shadow-card"
-              />
-            )}
+            <UserAvatar
+              avatarUrl={user?.avatarUrl}
+              displayName={user?.displayName ?? ''}
+              className="h-20 w-20 rounded-2xl border-2 border-border/60 shadow-card text-3xl"
+            />
             <div className="space-y-1.5">
               <div className="text-xl font-semibold font-heading">{user?.displayName}</div>
               <div className="text-sm text-muted-foreground">{user?.email}</div>

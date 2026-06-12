@@ -8,6 +8,7 @@ import { buildGlobalReviewsPath, canAccessReviewCenter } from '@/features/review
 import { clearSessionScopedQueries } from '@/features/notification/notification-session'
 import { canViewGovernanceCenter } from '@/shared/lib/governance-access'
 import { cn } from '@/shared/lib/utils'
+import { UserAvatar } from './user-avatar'
 
 interface User {
   displayName: string
@@ -120,14 +121,11 @@ export function UserMenu({ user, triggerClassName }: UserMenuProps) {
         className={cn('flex items-center gap-3 text-foreground hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:rounded-md', triggerClassName)}
         onClick={() => setIsClickOpen((current) => !current)}
       >
-        {user.avatarUrl && (
-          <img
-            src={user.avatarUrl}
-            alt={user.displayName}
-            loading="lazy"
-            className="w-8 h-8 rounded-full border border-border/60"
-          />
-        )}
+        <UserAvatar
+          avatarUrl={user.avatarUrl}
+          displayName={user.displayName}
+          className="w-8 h-8 rounded-full border border-border/60 text-sm"
+        />
         <span className="text-sm font-medium text-inherit">
           {user.displayName}
         </span>

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearch } from '@tanstack/react-router'
 import { Card } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -19,6 +20,7 @@ async function authorizeDevice(userCode: string): Promise<void> {
 
 export function DeviceAuthPage() {
   const { t } = useTranslation()
+  const search = useSearch({ from: '/device' })
   const [part1, setPart1] = useState('')
   const [part2, setPart2] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -26,10 +28,43 @@ export function DeviceAuthPage() {
 
   const input1Ref = useRef<HTMLInputElement>(null)
   const input2Ref = useRef<HTMLInputElement>(null)
+  // Capture code at mount — used by the auto-approve effect below
+  const autoCodeRef = useRef(search.code)
 
   useEffect(() => {
-    input1Ref.current?.focus()
-  }, [])
+    const code = autoCodeRef.current
+    if (!code) {
+      input1Ref.current?.focus()
+      return
+    }
+
+    const normalized = code.toUpperCase()
+    if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(normalized)) {
+      input1Ref.current?.focus()
+      return
+    }
+
+    // Code from URL is valid — pre-fill and auto-approve without user interaction
+    const [p1, p2] = normalized.split('-')
+    setPart1(p1)
+    setPart2(p2)
+    setIsSubmitting(true)
+
+    authorizeDevice(normalized)
+      .then(() => {
+        setMessage({ type: 'success', text: t('device.success') })
+      })
+      .catch((error) => {
+        setPart1('')
+        setPart2('')
+        setMessage({
+          type: 'error',
+          text: truncateErrorMessage(error instanceof Error ? error.message : t('device.defaultError')) ?? t('device.defaultError'),
+        })
+        input1Ref.current?.focus()
+      })
+      .finally(() => setIsSubmitting(false))
+  }, [t])
 
   const handlePart1Change = (value: string) => {
     const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4)
