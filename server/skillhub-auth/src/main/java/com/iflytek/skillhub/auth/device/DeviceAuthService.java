@@ -1,5 +1,6 @@
 package com.iflytek.skillhub.auth.device;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iflytek.skillhub.auth.token.ApiTokenService;
 import com.iflytek.skillhub.domain.shared.exception.DomainBadRequestException;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,15 +34,24 @@ public class DeviceAuthService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final ApiTokenService apiTokenService;
+    private final ObjectMapper objectMapper;
     private final String verificationUri;
     private final SecureRandom random = new SecureRandom();
 
     public DeviceAuthService(RedisTemplate<String, Object> redisTemplate,
                              ApiTokenService apiTokenService,
+                             ObjectMapper objectMapper,
                              @Value("${skillhub.device-auth.verification-uri:/cli/auth}") String verificationUri) {
         this.redisTemplate = redisTemplate;
         this.apiTokenService = apiTokenService;
+        this.objectMapper = objectMapper;
         this.verificationUri = verificationUri;
+    }
+
+    private DeviceCodeData fromRedis(Object raw) {
+        if (raw == null) return null;
+        if (raw instanceof DeviceCodeData d) return d;
+        return objectMapper.convertValue(raw, DeviceCodeData.class);
     }
 
     /**
@@ -71,7 +81,7 @@ public class DeviceAuthService {
             throw new DomainBadRequestException("error.deviceAuth.userCode.invalid");
         }
 
-        DeviceCodeData data = (DeviceCodeData) redisTemplate.opsForValue().get(DEVICE_CODE_PREFIX + deviceCode);
+        DeviceCodeData data = fromRedis(redisTemplate.opsForValue().get(DEVICE_CODE_PREFIX + deviceCode));
         if (data == null) {
             throw new DomainBadRequestException("error.deviceAuth.deviceCode.expired");
         }
@@ -97,7 +107,7 @@ public class DeviceAuthService {
      * into an API token exactly once.
      */
     public DeviceTokenResponse pollToken(String deviceCode) {
-        DeviceCodeData data = (DeviceCodeData) redisTemplate.opsForValue().get(DEVICE_CODE_PREFIX + deviceCode);
+        DeviceCodeData data = fromRedis(redisTemplate.opsForValue().get(DEVICE_CODE_PREFIX + deviceCode));
 
         if (data == null) {
             throw new DomainBadRequestException("error.deviceAuth.deviceCode.invalid");

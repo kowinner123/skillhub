@@ -13,10 +13,10 @@ COPY skillhub-notification/pom.xml skillhub-notification/
 COPY skillhub-app/pom.xml skillhub-app/
 COPY mvnw .
 COPY .mvn .mvn
-RUN ./mvnw dependency:go-offline -B
+RUN sed -i 's/\r//' mvnw && chmod +x mvnw && ./mvnw dependency:go-offline -B
 
 COPY . .
-RUN ./mvnw package -DskipTests -B
+RUN sed -i 's/\r//' mvnw && chmod +x mvnw && ./mvnw package -DskipTests -B
 
 # ---- Runtime Stage ----
 FROM eclipse-temurin:21-jre-alpine
