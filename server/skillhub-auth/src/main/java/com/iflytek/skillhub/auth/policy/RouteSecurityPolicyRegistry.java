@@ -100,6 +100,7 @@ public class RouteSecurityPolicyRegistry {
             ApiTokenPolicy.allow(HttpMethod.GET, "/api/web/skills/**"),
             ApiTokenPolicy.allow(HttpMethod.GET, "/api/v1/namespaces"),
             ApiTokenPolicy.allow(HttpMethod.GET, "/api/v1/namespaces/*"),
+            ApiTokenPolicy.allow(HttpMethod.GET, "/api/v1/me/namespaces"),
             ApiTokenPolicy.allow(HttpMethod.GET, "/api/web/namespaces"),
             ApiTokenPolicy.allow(HttpMethod.GET, "/api/web/namespaces/*"),
             ApiTokenPolicy.allow(HttpMethod.GET, "/api/v1/resolve/**"),
