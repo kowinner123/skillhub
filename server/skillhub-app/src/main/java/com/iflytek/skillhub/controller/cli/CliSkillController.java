@@ -96,7 +96,7 @@ public class CliSkillController extends BaseApiController {
     }
 
     @PostMapping(value = "/{namespace}/publish/validate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @RateLimit(category = "publish", authenticated = 10, anonymous = 0)
+    @RateLimit(category = "publish", authenticated = 60, anonymous = 0)
     public ApiResponse<CliDryRunResponse> validatePublish(
             @PathVariable String namespace,
             @RequestPart("file") MultipartFile file,
@@ -120,7 +120,7 @@ public class CliSkillController extends BaseApiController {
     }
 
     @PostMapping(value = "/{namespace}/publish", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @RateLimit(category = "publish", authenticated = 10, anonymous = 0)
+    @RateLimit(category = "publish", authenticated = 60, anonymous = 0)
     public ApiResponse<CliPublishResponse> publish(
             @PathVariable String namespace,
             @RequestPart("file") MultipartFile file,
