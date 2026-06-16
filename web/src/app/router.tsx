@@ -369,7 +369,6 @@ const dashboardTokensRoute = createRoute({
 const deviceRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'device',
-  beforeLoad: requireAuth,
   validateSearch: (search: Record<string, unknown>): { code?: string } => ({
     code: typeof search.code === 'string' && search.code ? search.code : undefined,
   }),

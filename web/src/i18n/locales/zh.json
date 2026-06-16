@@ -291,7 +291,11 @@
     "defaultError": "授权失败，请检查用户码是否正确",
     "submitting": "授权中...",
     "submit": "授权设备",
-    "notice": "授权后,设备将可以访问你的账户"
+    "notice": "授权后,设备将可以访问你的账户",
+    "loginRequired": "请先登录以完成设备授权。",
+    "loginToAuthorize": "登录并授权",
+    "autoCloseNotice": "此页面即将自动关闭…",
+    "closeTab": "授权成功，你可以关闭此标签页。"
   },
   "cliAuth": {
     "validating": "验证中...",

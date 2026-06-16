@@ -291,7 +291,11 @@
     "defaultError": "Authorization failed, please check the user code",
     "submitting": "Authorizing...",
     "submit": "Authorize Device",
-    "notice": "After authorization, the device will have access to your account"
+    "notice": "After authorization, the device will have access to your account",
+    "loginRequired": "You need to sign in to complete device authorization.",
+    "loginToAuthorize": "Sign in to Authorize",
+    "autoCloseNotice": "This tab will close automatically…",
+    "closeTab": "You can now close this tab."
   },
   "cliAuth": {
     "validating": "Validating...",

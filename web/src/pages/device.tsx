@@ -7,6 +7,8 @@ import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { fetchJson, getCsrfHeaders } from '@/api/client'
 import { truncateErrorMessage } from '@/shared/lib/error-display'
+import { useAuth } from '@/features/auth/use-auth'
+import { LoginButton } from '@/features/auth/login-button'
 
 async function authorizeDevice(userCode: string): Promise<void> {
   await fetchJson<void>('/api/v1/device/authorize', {
@@ -20,19 +22,24 @@ async function authorizeDevice(userCode: string): Promise<void> {
 
 export function DeviceAuthPage() {
   const { t } = useTranslation()
+  const { user, isLoading: authLoading } = useAuth()
   const search = useSearch({ from: '/device' })
   const [part1, setPart1] = useState('')
   const [part2, setPart2] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [closing, setClosing] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const input1Ref = useRef<HTMLInputElement>(null)
   const input2Ref = useRef<HTMLInputElement>(null)
-  // Capture code at mount — used by the auto-approve effect below
-  const autoCodeRef = useRef(search.code)
+  const hasAutoApprovedRef = useRef(false)
 
+  // Auto-approve when user is authenticated and a code is in the URL
   useEffect(() => {
-    const code = autoCodeRef.current
+    if (authLoading || !user) return
+    if (hasAutoApprovedRef.current) return
+
+    const code = search.code
     if (!code) {
       input1Ref.current?.focus()
       return
@@ -44,7 +51,7 @@ export function DeviceAuthPage() {
       return
     }
 
-    // Code from URL is valid — pre-fill and auto-approve without user interaction
+    hasAutoApprovedRef.current = true
     const [p1, p2] = normalized.split('-')
     setPart1(p1)
     setPart2(p2)
@@ -53,8 +60,11 @@ export function DeviceAuthPage() {
     authorizeDevice(normalized)
       .then(() => {
         setMessage({ type: 'success', text: t('device.success') })
+        setClosing(true)
+        setTimeout(() => { window.close() }, 1500)
       })
       .catch((error) => {
+        hasAutoApprovedRef.current = false
         setPart1('')
         setPart2('')
         setMessage({
@@ -64,7 +74,7 @@ export function DeviceAuthPage() {
         input1Ref.current?.focus()
       })
       .finally(() => setIsSubmitting(false))
-  }, [t])
+  }, [authLoading, user, search.code, t])
 
   const handlePart1Change = (value: string) => {
     const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4)
@@ -112,7 +122,13 @@ export function DeviceAuthPage() {
       setMessage({ type: 'success', text: t('device.success') })
       setPart1('')
       setPart2('')
-      input1Ref.current?.focus()
+      // Close the tab if it was opened with a code (i.e. from CLI flow)
+      if (search.code) {
+        setClosing(true)
+        setTimeout(() => { window.close() }, 1500)
+      } else {
+        input1Ref.current?.focus()
+      }
     } catch (error) {
       setMessage({
         type: 'error',
@@ -121,6 +137,30 @@ export function DeviceAuthPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // Not logged in + has code → show inline login prompt to preserve the code through OAuth flow
+  if (!authLoading && !user && search.code) {
+    const returnTo = `/device?code=${search.code}`
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-4 animate-fade-up">
+        <Card className="w-full max-w-md p-8 space-y-8">
+          <div className="text-center space-y-3">
+            <div className="inline-flex w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent items-center justify-center shadow-glow mb-2 mx-auto">
+              <svg className="w-8 h-8 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold font-heading">{t('device.title')}</h1>
+            <p className="text-muted-foreground">{t('device.loginRequired')}</p>
+          </div>
+          <LoginButton returnTo={returnTo} />
+          <div className="text-center text-sm text-muted-foreground">
+            <p>{t('device.notice')}</p>
+          </div>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -178,6 +218,12 @@ export function DeviceAuthPage() {
               }`}
             >
               {message.text}
+              {closing && (
+                <p className="mt-1 text-xs opacity-75">{t('device.autoCloseNotice')}</p>
+              )}
+              {message.type === 'success' && !closing && (
+                <p className="mt-1 text-xs opacity-75">{t('device.closeTab')}</p>
+              )}
             </div>
           )}
 
