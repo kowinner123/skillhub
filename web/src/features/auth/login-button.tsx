@@ -48,6 +48,9 @@ export function LoginButton({ returnTo }: LoginButtonProps) {
           className="w-full h-12 text-base"
           variant="outline"
           onClick={() => {
+            if (returnTo) {
+              try { sessionStorage.setItem('auth.pendingReturnTo', returnTo) } catch {}
+            }
             window.location.href = provider.actionUrl
           }}
         >

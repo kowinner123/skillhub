@@ -27,6 +27,23 @@ export function Layout() {
   const contentLayoutPathname = resolveAppMainContentPathname(pathname, resolvedPathname)
   const mainContentLayout = getAppMainContentLayout(contentLayoutPathname)
 
+  // After OAuth login the server may redirect to /dashboard instead of the intended returnTo
+  // (e.g. when the Redis session is not carried through the cross-domain callback). This effect
+  // reads a pending returnTo stored in sessionStorage by LoginButton and performs the redirect.
+  useEffect(() => {
+    if (isLoading || !user) return
+    try {
+      const pending = sessionStorage.getItem('auth.pendingReturnTo')
+      if (pending && pending.startsWith('/')) {
+        sessionStorage.removeItem('auth.pendingReturnTo')
+        const current = window.location.pathname + window.location.search
+        if (current !== pending) {
+          window.location.href = pending
+        }
+      }
+    } catch {}
+  }, [user, isLoading])
+
   useEffect(() => {
     const updateHeaderElevation = () => {
       setIsHeaderElevated(window.scrollY > 0)

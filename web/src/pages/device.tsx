@@ -20,6 +20,13 @@ async function authorizeDevice(userCode: string): Promise<void> {
   })
 }
 
+// Attempt to close the tab. Works when the tab was opened via window.open() (i.e. history.length === 1
+// and no prior navigation). For tabs opened by the OS (e.g. Python webbrowser.open after an OAuth
+// redirect chain), the browser silently blocks the call — the caller should show a manual-close hint.
+function tryClose() {
+  window.close()
+}
+
 export function DeviceAuthPage() {
   const { t } = useTranslation()
   const { user, isLoading: authLoading } = useAuth()
@@ -27,7 +34,6 @@ export function DeviceAuthPage() {
   const [part1, setPart1] = useState('')
   const [part2, setPart2] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [closing, setClosing] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const input1Ref = useRef<HTMLInputElement>(null)
@@ -60,8 +66,10 @@ export function DeviceAuthPage() {
     authorizeDevice(normalized)
       .then(() => {
         setMessage({ type: 'success', text: t('device.success') })
-        setClosing(true)
-        setTimeout(() => { window.close() }, 1500)
+        // Attempt to close the tab. If the browser allows it the window closes here and the
+        // success message below is never rendered. If blocked (e.g. after an OAuth redirect
+        // chain added navigation history) the closeTab hint is shown to the user instead.
+        tryClose()
       })
       .catch((error) => {
         hasAutoApprovedRef.current = false
@@ -122,10 +130,8 @@ export function DeviceAuthPage() {
       setMessage({ type: 'success', text: t('device.success') })
       setPart1('')
       setPart2('')
-      // Close the tab if it was opened with a code (i.e. from CLI flow)
       if (search.code) {
-        setClosing(true)
-        setTimeout(() => { window.close() }, 1500)
+        tryClose()
       } else {
         input1Ref.current?.focus()
       }
@@ -218,10 +224,7 @@ export function DeviceAuthPage() {
               }`}
             >
               {message.text}
-              {closing && (
-                <p className="mt-1 text-xs opacity-75">{t('device.autoCloseNotice')}</p>
-              )}
-              {message.type === 'success' && !closing && (
+              {message.type === 'success' && (
                 <p className="mt-1 text-xs opacity-75">{t('device.closeTab')}</p>
               )}
             </div>
