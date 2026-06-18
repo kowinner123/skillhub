@@ -172,12 +172,13 @@ public class ClawHubCompatAppService {
     public ClawHubSkillListResponse listSkills(int page,
                                                int limit,
                                                String sort,
+                                               String namespace,
                                                String userId,
                                                Map<Long, NamespaceRole> userNsRoles) {
         String sortBy = sort != null ? sort : "newest";
         SkillSearchAppService.SearchResponse response = skillSearchAppService.search(
                 "",
-                null,
+                namespace,
                 sortBy,
                 page,
                 limit,
